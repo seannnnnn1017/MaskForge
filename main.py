@@ -181,6 +181,12 @@ class SemanticSegmentationTool:
         ttk.Button(undo_redo_frame, text="↩️ Undo (Ctrl+Z)", command=self.undo).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0,2))
         ttk.Button(undo_redo_frame, text="↪️ Redo (Ctrl+Y)", command=self.redo).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(2,0))
 
+        # 圖片切換按鈕
+        nav_frame = ttk.Frame(action_frame)
+        nav_frame.pack(fill=tk.X, pady=2)
+        ttk.Button(nav_frame, text="⬆️ 上一張 (↑)", command=self.previous_image).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0,2))
+        ttk.Button(nav_frame, text="⬇️ 下一張 (↓)", command=self.next_image).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(2,0))
+
         ttk.Button(action_frame, text="🗑️ 清除遮罩",
                   command=self.clear_mask).pack(fill=tk.X, pady=2)
         ttk.Button(action_frame, text="💾 儲存遮罩",
@@ -220,6 +226,39 @@ class SemanticSegmentationTool:
         self.root.bind('<Control-y>', lambda event: self.redo())
         self.root.bind('e', lambda event: self.toggle_erase_mode())
         self.root.bind('E', lambda event: self.toggle_erase_mode())
+        
+        # 添加方向鍵切換照片的快捷鍵
+        self.root.bind('<Up>', lambda event: self.previous_image())
+        self.root.bind('<Down>', lambda event: self.next_image())
+        
+        # 讓窗口獲得焦點，確保快捷鍵能正常工作
+        self.root.focus_set()
+
+    def previous_image(self):
+        """切換到上一張圖片"""
+        if not self.images:
+            return
+        
+        new_index = (self.current_image_index - 1) % len(self.images)
+        self.select_image(new_index)
+        
+        # 更新列表框選擇
+        self.image_listbox.selection_clear(0, tk.END)
+        self.image_listbox.selection_set(new_index)
+        self.image_listbox.see(new_index)
+        
+    def next_image(self):
+        """切換到下一張圖片"""
+        if not self.images:
+            return
+        
+        new_index = (self.current_image_index + 1) % len(self.images)
+        self.select_image(new_index)
+        
+        # 更新列表框選擇
+        self.image_listbox.selection_clear(0, tk.END)
+        self.image_listbox.selection_set(new_index)
+        self.image_listbox.see(new_index)
 
     def toggle_erase_mode(self):
         """切換橡皮擦模式 (E) 鍵切換 brush/eraser"""
